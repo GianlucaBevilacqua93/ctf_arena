@@ -1,0 +1,26 @@
+/* ============================================================
+ * Volta-OliCyber CTF — Shared base styles
+ * Ogni pagina include i propri token di colore e tema.
+ * Questo file è opzionale e contiene solo override globali.
+ * ============================================================ */
+
+/* Scrollbar custom (dark/light entrambi) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border, #2E2A45); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--prime-dim, #5300A3); }
+
+/* Selezione testo */
+::selection { background: rgba(83, 0, 163, 0.4); color: #fff; }
+
+/* Focus visibile per accessibilità */
+:focus-visible { outline: 2px solid var(--primary, #C9A4FF); outline-offset: 2px; }
+
+/* Transition smooth per cambio tema */
+*, *::before, *::after {
+  transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+}
+
+/* Override: no transition on transforms/transforms per performance */
+.card, .modal, .toast, .spinner { transition: none !important; }
+.card { transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s !important; }
