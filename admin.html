@@ -550,11 +550,10 @@ function closeOverlay(id) { document.getElementById(id).classList.remove('open')
 
 // ── API ───────────────────────────────────────────────────────
 async function gasPost(data) {
-  const r = await fetch(GAS_URL, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
+  // Tutto via GET con payload in ?p= per evitare preflight CORS con GAS
+  const url = new URL(GAS_URL);
+  url.searchParams.set('p', JSON.stringify(data));
+  const r = await fetch(url.toString(), { redirect: 'follow' });
   return r.json();
 }
 
