@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — Volta-OliCyber CTF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+:root,[data-theme="dark"]{
+  --bg:#0A0A0F;--surface:#12121A;--elevated:#1A1A26;--border:#2E2A45;
+  --primary:#C9A4FF;--prime-dim:#5300A3;--secondary:#00FFC8;--tertiary:#FF6EC7;
+  --error:#FF6B6B;--warning:#FFB300;--text:#E6E0F8;--muted:#9E98B5;--shadow:rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#F4F2FB;--surface:#FFF;--elevated:#EDE9F7;--border:#C8C2E0;
+  --primary:#6200EA;--prime-dim:#B39DDB;--secondary:#00897B;--tertiary:#AD1457;
+  --error:#D32F2F;--warning:#F57F17;--text:#1C1838;--muted:#5C5470;--shadow:rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;transition:background .3s,color .3s}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at center,#1a0a3a 0%,var(--bg) 70%)}
+.login-card{background:var(--surface);border:1px solid var(--prime-dim);border-radius:20px;padding:44px 36px;width:360px;text-align:center;box-shadow:0 0 60px rgba(201,164,255,.12)}
+.login-logo{font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700;color:var(--primary);margin-bottom:4px;letter-spacing:.1em}
+.login-sub{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:28px}
+.login-input{width:100%;background:var(--elevated);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.95rem;outline:none;margin-bottom:12px;transition:border-color .2s}
+.login-input:focus{border-color:var(--primary)}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--prime-dim),#7B00D4);border:none;border-radius:10px;padding:13px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;letter-spacing:.06em;transition:filter .2s}
+.login-btn:hover{filter:brightness(1.15)}
+.login-err{color:var(--error);font-size:.82rem;margin-top:10px;display:none}
+
+/* TOPBAR */
+#app{display:none}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.topbar-title{font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px}
+.spacer{flex:1}
+.chip{display:flex;align-items:center;gap:5px;background:var(--elevated);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--secondary)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--muted);font-size:.82rem;cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn.primary-btn{background:var(--prime-dim);border-color:var(--prime-dim);color:#fff}
+.btn.primary-btn:hover{filter:brightness(1.2)}
+.btn.danger-btn{border-color:var(--error);color:var(--error)}
+.btn.danger-btn:hover{background:rgba(255,107,107,.1)}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 7px;color:var(--muted);cursor:pointer;display:flex;align-items:center;transition:all .2s}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+/* MAIN */
+.main{padding:24px;max-width:1400px;margin:0 auto}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center}
+.stat-val{font-family:'Rajdhani',sans-serif;font-size:2.2rem;font-weight:700;margin-bottom:2px}
+.stat-label{font-size:.72rem;color:var(--muted);font-family:'Share Tech Mono',monospace}
+.c-primary{color:var(--primary)}.c-secondary{color:var(--secondary)}.c-tertiary{color:var(--tertiary)}.c-warning{color:var(--warning)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:20px;border:1px solid var(--border);width:fit-content}
+.tab{background:none;border:none;border-radius:7px;padding:9px 18px;color:var(--muted);font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .15s}
+.tab.active{background:var(--prime-dim);color:var(--primary)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.table-head-row{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-head-row h3{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:8px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:12px 18px;background:var(--elevated);font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid rgba(46,42,69,.35);transition:background .12s}
+tbody tr:hover{background:var(--elevated)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:12px 18px;font-size:.875rem}
+.rank-badge{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.78rem}
+.r1{background:#FFD700;color:#000}.r2{background:#C0C0C0;color:#000}.r3{background:#CD7F32;color:#000}
+.rn{background:var(--elevated);color:var(--muted);border:1px solid var(--border)}
+.score-chip{background:rgba(201,164,255,.12);border:1px solid var(--prime-dim);border-radius:20px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--primary)}
+
+/* CAT BADGE */
+.cat-b{border-radius:6px;padding:2px 8px;font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-family:'Share Tech Mono',monospace}
+.cat-WEB{background:rgba(0,255,200,.12);color:#00FFC8}
+.cat-STEGO{background:rgba(201,164,255,.15);color:#C9A4FF}
+.cat-CRYPTO{background:rgba(255,179,0,.12);color:#FFB300}
+.cat-REVERSING{background:rgba(255,107,107,.12);color:#FF6B6B}
+.cat-NETWORK{background:rgba(255,110,199,.12);color:#FF6EC7}
+
+/* STAT BAR */
+.stat-bar{width:100%;height:4px;background:var(--elevated);border-radius:2px;overflow:hidden;margin-top:4px}
+.stat-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--secondary),var(--primary));transition:width .4s}
+.pills{display:flex;gap:6px;flex-shrink:0}
+.pill{border-radius:20px;padding:3px 8px;font-size:.68rem;font-family:'Share Tech Mono',monospace}
+.pill-ok{background:rgba(0,255,200,.12);color:var(--secondary)}
+.pill-fail{background:rgba(255,107,107,.12);color:var(--error)}
+.pill-tot{background:var(--elevated);color:var(--muted);border:1px solid var(--border)}
+
+/* CHALLENGE LIST */
+.ch-list{display:flex;flex-direction:column;gap:10px}
+.ch-row{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;transition:border-color .15s}
+.ch-row:hover{border-color:var(--primary)}
+.ch-info{flex:1;min-width:0}
+.ch-title{font-family:'Rajdhani',sans-serif;font-size:.98rem;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-meta{font-size:.72rem;color:var(--muted);font-family:'Share Tech Mono',monospace}
+.ch-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* CHALLENGE EDITOR MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.editor-modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:640px;padding:28px;display:flex;flex-direction:column;gap:16px;margin:auto;transform:translateY(20px);transition:transform .2s}
+.overlay.open .editor-modal{transform:translateY(0)}
+.editor-header{display:flex;align-items:center;justify-content:space-between}
+.editor-title{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:.72rem;color:var(--muted);font-family:'Share Tech Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:.875rem;outline:none;transition:border-color .2s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary)}
+.form-select option{background:var(--elevated)}
+.form-textarea{resize:vertical;min-height:90px;font-family:'Exo 2',sans-serif;line-height:1.5}
+.note-textarea{min-height:70px;border-color:rgba(255,179,0,.4);background:rgba(255,179,0,.04)}
+.note-textarea:focus{border-color:var(--warning)}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+
+/* DELETE CONFIRM */
+.confirm-modal{background:var(--surface);border:1px solid var(--error);border-radius:16px;width:100%;max-width:380px;padding:28px;text-align:center;display:flex;flex-direction:column;gap:14px;margin:auto}
+.confirm-modal p{font-size:.9rem;color:var(--muted);line-height:1.6}
+
+/* SPINNER */
+.loading{text-align:center;padding:48px;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.8rem}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--secondary);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TOAST */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:500;display:flex;flex-direction:column;gap:6px}
+.toast{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.82rem;display:flex;align-items:center;gap:7px;box-shadow:0 4px 16px var(--shadow);animation:slide-in .25s ease;max-width:300px}
+.toast.ok{border-color:var(--secondary);color:var(--secondary)}.toast.err{border-color:var(--error);color:var(--error)}.toast.info{border-color:var(--primary);color:var(--primary)}
+@keyframes slide-in{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.ch-actions{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">⚡ VOLTA CTF</div>
+    <div class="login-sub">// dashboard docente — accesso riservato</div>
+    <input class="login-input" type="password" id="pwd-input" placeholder="Password amministratore" autocomplete="current-password">
+    <button class="login-btn" onclick="doLogin()">
+      <span class="material-symbols-outlined" style="vertical-align:middle;font-size:1rem">lock_open</span>
+      ACCEDI
+    </button>
+    <div class="login-err" id="login-err">Credenziali errate. Riprova.</div>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════════ -->
+<div id="app">
+  <div class="topbar">
+    <span class="topbar-title">
+      <span class="material-symbols-outlined" style="font-size:1.2rem">admin_panel_settings</span>
+      Volta Admin
+    </span>
+    <div class="spacer"></div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);font-family:monospace">
+      <div class="pulse"></div><span id="last-refresh">–</span>
+    </div>
+    <div class="chip" id="log-chip">– log</div>
+    <button class="btn" onclick="exportCSV()">
+      <span class="material-symbols-outlined" style="font-size:.9rem">download</span>CSV
+    </button>
+    <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema">
+      <span class="material-symbols-outlined" id="theme-icon">light_mode</span>
+    </button>
+    <button class="btn" onclick="logout()">
+      <span class="material-symbols-outlined" style="font-size:.9rem">logout</span>Esci
+    </button>
+  </div>
+
+  <div class="main">
+    <div class="stats">
+      <div class="stat-card"><div class="stat-val c-primary" id="s-players">–</div><div class="stat-label">Partecipanti</div></div>
+      <div class="stat-card"><div class="stat-val c-secondary" id="s-solved">–</div><div class="stat-label">Risolte (totale)</div></div>
+      <div class="stat-card"><div class="stat-val c-tertiary" id="s-attempts">–</div><div class="stat-label">Tentativi</div></div>
+      <div class="stat-card"><div class="stat-val c-warning" id="s-top">–</div><div class="stat-label">Punteggio max</div></div>
+      <div class="stat-card"><div class="stat-val c-primary" id="s-challenges">–</div><div class="stat-label">Sfide totali</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('leaderboard', this)">
+        <span class="material-symbols-outlined" style="font-size:.95rem">leaderboard</span>Classifica
+      </button>
+      <button class="tab" onclick="switchTab('stats', this)">
+        <span class="material-symbols-outlined" style="font-size:.95rem">bar_chart</span>Statistiche
+      </button>
+      <button class="tab" onclick="switchTab('challenges', this)">
+        <span class="material-symbols-outlined" style="font-size:.95rem">edit_note</span>Sfide
+      </button>
+    </div>
+
+    <!-- CLASSIFICA -->
+    <div class="tab-pane active" id="tab-leaderboard">
+      <div class="table-wrap">
+        <div class="table-head-row">
+          <h3><span class="material-symbols-outlined" style="font-size:1rem">leaderboard</span>Classifica in Tempo Reale</h3>
+          <button class="btn" onclick="loadData()">
+            <span class="material-symbols-outlined" style="font-size:.9rem">refresh</span>Aggiorna
+          </button>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Nickname</th><th>User ID</th><th>Punteggio</th></tr></thead>
+          <tbody id="lb-body"><tr><td colspan="4" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STATISTICHE -->
+    <div class="tab-pane" id="tab-stats">
+      <div class="ch-list" id="stats-list">
+        <div class="loading"><div class="spinner"></div>Caricamento...</div>
+      </div>
+    </div>
+
+    <!-- SFIDE (CRUD) -->
+    <div class="tab-pane" id="tab-challenges">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.85rem;color:var(--muted)">Gestisci le sfide presenti sul server.</span>
+        <button class="btn primary-btn" onclick="openEditor(null)">
+          <span class="material-symbols-outlined" style="font-size:.9rem">add</span>Nuova sfida
+        </button>
+      </div>
+      <div class="ch-list" id="ch-list">
+        <div class="loading"><div class="spinner"></div>Caricamento...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDITOR OVERLAY ════════════════════════════════════════ -->
+<div class="overlay" id="ov-editor">
+  <div class="editor-modal">
+    <div class="editor-header">
+      <span class="editor-title" id="editor-title">Nuova sfida</span>
+      <button class="modal-close" onclick="closeEditor()"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">ID</label>
+        <input class="form-input" id="e-id" type="text" placeholder="WEB-01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" id="e-cat">
+          <option>WEB</option><option>STEGO</option><option>CRYPTO</option>
+          <option>REVERSING</option><option>NETWORK</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Titolo</label>
+        <input class="form-input" id="e-title" type="text" placeholder="Titolo della sfida">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Descrizione (markdown/testo)</label>
+        <textarea class="form-textarea" id="e-desc" rows="4" placeholder="Descrizione completa della sfida..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Flag corretta</label>
+        <input class="form-input" id="e-flag" type="text" placeholder="FLAG{ESEMPIO_FLAG_2025}" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Punti</label>
+        <input class="form-input" id="e-pts" type="number" min="50" step="50" placeholder="100">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Difficoltà (1–5)</label>
+        <input class="form-input" id="e-diff" type="number" min="1" max="5" placeholder="1">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Strumenti consigliati</label>
+        <input class="form-input" id="e-tools" type="text" placeholder="Wireshark, tshark, Scapy">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">URL asset (file scaricabile dagli studenti)</label>
+        <input class="form-input" id="e-asset" type="text" placeholder="assets/pcap/net01.pcap oppure https://...">
+      </div>
+      <div class="form-group full">
+        <label class="form-label" style="color:var(--warning)">
+          <span class="material-symbols-outlined" style="font-size:.85rem;vertical-align:middle">lock</span>
+          Note admin (visibili SOLO ai docenti)
+        </label>
+        <textarea class="form-textarea note-textarea" id="e-note" rows="3" placeholder="Soluzione passo-passo, note per il docente, flag alternativa..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeEditor()">Annulla</button>
+      <button class="btn primary-btn" onclick="saveChallenge()">
+        <span class="material-symbols-outlined" style="font-size:.9rem">save</span>Salva
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DELETE CONFIRM ════════════════════════════════════════ -->
+<div class="overlay" id="ov-confirm">
+  <div class="confirm-modal">
+    <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--error)">warning</span>
+    <strong style="font-family:'Rajdhani',sans-serif;font-size:1.1rem">Eliminare la sfida?</strong>
+    <p>Stai per eliminare "<span id="del-name">–</span>". Questa operazione è irreversibile.</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn" onclick="closeOverlay('ov-confirm')">Annulla</button>
+      <button class="btn danger-btn" onclick="confirmDelete()">
+        <span class="material-symbols-outlined" style="font-size:.9rem">delete</span>Elimina
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+'use strict';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwZUUMcQVUc6AA-Tc3VvATJnHjTnLG1YUCM4zqezhhW3Lp2VUUM1koff8sey00j1OWuIA/exec';
+let adminToken = '';
+let cachedData = null;
+let pendingDeleteId = '';
+
+// ── THEME ─────────────────────────────────────────────────────
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.getElementById('theme-icon').textContent = t === 'dark' ? 'light_mode' : 'dark_mode';
+  localStorage.setItem('voc_admin_theme', t);
+}
+function toggleTheme() { applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'); }
+applyTheme(localStorage.getItem('voc_admin_theme') || 'dark');
+
+// ── LOGIN ─────────────────────────────────────────────────────
+document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin() {
+  const pwd = document.getElementById('pwd-input').value.trim();
+  if (!pwd) return;
+  try {
+    const res = await gasPost({ action: 'adminLogin', password: pwd });
+    if (res.status === 'ok' && res.token) {
+      adminToken = res.token;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      await loadData();
+      setInterval(loadData, 30000);
+    } else {
+      showLoginErr(res.error || 'Credenziali errate');
+    }
+  } catch(e) {
+    showLoginErr('Errore di connessione: ' + e.message);
+  }
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function logout() {
+  adminToken = '';
+  cachedData = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pwd-input').value = '';
+}
+
+// ── DATA LOAD ─────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const data = await gasPost({ action: 'adminGetData', token: adminToken });
+    if (data.error) { toast(data.error, 'err'); return; }
+    cachedData = data;
+    renderAll(data);
+    document.getElementById('last-refresh').textContent = 'agg. ' + new Date().toLocaleTimeString('it-IT');
+  } catch(e) {
+    toast('Errore caricamento: ' + e.message, 'err');
+  }
+}
+
+function renderAll(data) {
+  const lb = data.leaderboard || [];
+  const ch = data.challenges  || [];
+
+  // Stats
+  document.getElementById('s-players').textContent    = lb.length;
+  document.getElementById('s-solved').textContent     = ch.reduce((s,c)=>s+(c.stat?.ok||0),0);
+  document.getElementById('s-attempts').textContent   = data.logCount || 0;
+  document.getElementById('s-top').textContent        = lb.length ? lb[0].score : 0;
+  document.getElementById('s-challenges').textContent = ch.length;
+  document.getElementById('log-chip').textContent     = (data.logCount||0) + ' log';
+
+  // Leaderboard
+  const tbody = document.getElementById('lb-body');
+  tbody.innerHTML = lb.length ? lb.map((u,i) => `
+    <tr>
+      <td><span class="rank-badge ${['r1','r2','r3'][i]||'rn'}">${i+1}</span></td>
+      <td><strong>${esc(u.nickname)}</strong></td>
+      <td style="font-family:monospace;font-size:.72rem;color:var(--muted)">${esc(u.uid).substring(0,12)}…</td>
+      <td><span class="score-chip">${u.score} pt</span></td>
+    </tr>`).join('')
+    : '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted)">Nessun partecipante ancora.</td></tr>';
+
+  // Stats per sfida
+  const sl = document.getElementById('stats-list');
+  sl.innerHTML = ch.map(c => {
+    const rate = c.stat.total ? Math.round(c.stat.ok/c.stat.total*100) : 0;
+    return `<div class="ch-row">
+      <span class="cat-b cat-${esc(c.categoria)}">${esc(c.categoria)}</span>
+      <div class="ch-info">
+        <div class="ch-title">${esc(c.titolo)} <span style="color:var(--muted);font-size:.8rem;font-weight:400">${esc(c.id)}</span></div>
+        <div class="ch-meta">${c.punti} pt · tasso: ${rate}%</div>
+        <div class="stat-bar"><div class="stat-fill" style="width:${rate}%"></div></div>
+      </div>
+      <div class="pills">
+        <span class="pill pill-tot">📊 ${c.stat.total}</span>
+        <span class="pill pill-ok">✓ ${c.stat.ok}</span>
+        <span class="pill pill-fail">✗ ${c.stat.fail}</span>
+      </div>
+    </div>`;
+  }).join('') || '<div class="loading">Nessuna sfida.</div>';
+
+  // Challenge list (CRUD)
+  const cl = document.getElementById('ch-list');
+  cl.innerHTML = ch.map(c => `
+    <div class="ch-row">
+      <span class="cat-b cat-${esc(c.categoria)}">${esc(c.categoria)}</span>
+      <div class="ch-info">
+        <div class="ch-title">${esc(c.titolo)} <span style="color:var(--muted);font-size:.78rem">${esc(c.id)}</span></div>
+        <div class="ch-meta">${c.punti} pt · diff ${c.difficolta}/5
+          ${c.note ? ' · <span style="color:var(--warning)">📝 note</span>' : ''}
+          ${c.assetUrl ? ' · <span style="color:var(--secondary)">📎 asset</span>' : ''}
+        </div>
+      </div>
+      <div class="ch-actions">
+        <button class="btn" onclick="openEditor(${JSON.stringify(JSON.stringify(c))})">
+          <span class="material-symbols-outlined" style="font-size:.85rem">edit</span>Modifica
+        </button>
+        <button class="btn danger-btn" onclick="askDelete('${esc(c.id)}','${esc(c.titolo)}')">
+          <span class="material-symbols-outlined" style="font-size:.85rem">delete</span>
+        </button>
+      </div>
+    </div>`).join('') || '<div class="loading">Nessuna sfida. Creane una!</div>';
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+// ── EDITOR ────────────────────────────────────────────────────
+function openEditor(jsonStr) {
+  const c = jsonStr ? JSON.parse(jsonStr) : null;
+  document.getElementById('editor-title').textContent = c ? 'Modifica sfida' : 'Nuova sfida';
+  document.getElementById('e-id').value    = c?.id || '';
+  document.getElementById('e-id').disabled = !!c; // ID non modificabile in edit
+  document.getElementById('e-cat').value   = c?.categoria || 'WEB';
+  document.getElementById('e-title').value = c?.titolo || '';
+  document.getElementById('e-desc').value  = c?.descrizione || '';
+  document.getElementById('e-flag').value  = c?.flag || '';
+  document.getElementById('e-pts').value   = c?.punti || 100;
+  document.getElementById('e-diff').value  = c?.difficolta || 1;
+  document.getElementById('e-tools').value = c?.tool || '';
+  document.getElementById('e-asset').value = c?.assetUrl || '';
+  document.getElementById('e-note').value  = c?.note || '';
+  openOverlay('ov-editor');
+  setTimeout(() => document.getElementById(c ? 'e-title' : 'e-id').focus(), 200);
+}
+
+function closeEditor() { closeOverlay('ov-editor'); }
+
+async function saveChallenge() {
+  const challenge = {
+    id:          document.getElementById('e-id').value.trim(),
+    categoria:   document.getElementById('e-cat').value,
+    titolo:      document.getElementById('e-title').value.trim(),
+    descrizione: document.getElementById('e-desc').value.trim(),
+    flag:        document.getElementById('e-flag').value.trim(),
+    punti:       parseInt(document.getElementById('e-pts').value) || 100,
+    difficolta:  parseInt(document.getElementById('e-diff').value) || 1,
+    tool:        document.getElementById('e-tools').value.trim(),
+    assetUrl:    document.getElementById('e-asset').value.trim(),
+    note:        document.getElementById('e-note').value.trim()
+  };
+  if (!challenge.id)    { toast('ID obbligatorio', 'err'); return; }
+  if (!challenge.titolo){ toast('Titolo obbligatorio', 'err'); return; }
+  if (!challenge.flag)  { toast('Flag obbligatoria', 'err'); return; }
+
+  const res = await gasPost({ action: 'adminSaveChallenge', token: adminToken, challenge });
+  if (res.status === 'ok') {
+    toast((res.action === 'created' ? '✅ Sfida creata: ' : '✅ Sfida aggiornata: ') + res.id, 'ok');
+    closeEditor();
+    await loadData();
+  } else {
+    toast('Errore: ' + (res.error || 'sconosciuto'), 'err');
+  }
+}
+
+// ── DELETE ────────────────────────────────────────────────────
+function askDelete(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('del-name').textContent = name;
+  openOverlay('ov-confirm');
+}
+
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const res = await gasPost({ action: 'adminDeleteChallenge', token: adminToken, id: pendingDeleteId });
+  closeOverlay('ov-confirm');
+  if (res.status === 'ok') {
+    toast('🗑 Sfida eliminata: ' + res.deleted, 'info');
+    await loadData();
+  } else {
+    toast('Errore: ' + (res.error || 'sconosciuto'), 'err');
+  }
+  pendingDeleteId = '';
+}
+
+// ── CSV EXPORT ────────────────────────────────────────────────
+function exportCSV() {
+  if (!cachedData) return;
+  const lb = cachedData.leaderboard || [];
+  const rows = [['Rank','Nickname','UserID','Punteggio'],
+    ...lb.map((u,i) => [i+1, u.nickname, u.uid, u.score])];
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'volta-ctf-classifica-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ── OVERLAYS ──────────────────────────────────────────────────
+function openOverlay(id)  { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── API ───────────────────────────────────────────────────────
+async function gasPost(data) {
+  const r = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  return r.json();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg, type) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'info');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(30px)'; t.style.transition='all .25s'; setTimeout(()=>t.remove(),250); }, 3500);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

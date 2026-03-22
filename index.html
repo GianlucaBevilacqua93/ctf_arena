@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volta-OliCyber CTF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══════════════════════════════════════════ */
+:root,[data-theme="dark"]{
+  --bg:        #0A0A0F;
+  --surface:   #12121A;
+  --elevated:  #1A1A26;
+  --border:    #2E2A45;
+  --primary:   #C9A4FF;
+  --prime-dim: #5300A3;
+  --secondary: #00FFC8;
+  --tertiary:  #FF6EC7;
+  --error:     #FF6B6B;
+  --warning:   #FFB300;
+  --text:      #E6E0F8;
+  --muted:     #9E98B5;
+  --card-bg:   #14141E;
+  --shadow:    rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:        #F4F2FB;
+  --surface:   #FFFFFF;
+  --elevated:  #EDE9F7;
+  --border:    #C8C2E0;
+  --primary:   #6200EA;
+  --prime-dim: #B39DDB;
+  --secondary: #00897B;
+  --tertiary:  #AD1457;
+  --error:     #D32F2F;
+  --warning:   #F57F17;
+  --text:      #1C1838;
+  --muted:     #5C5470;
+  --card-bg:   #FFFFFF;
+  --shadow:    rgba(0,0,0,.12);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;transition:background .3s,color .3s}
+
+/* ══ TOPBAR ═════════════════════════════════════════════════ */
+.topbar{position:sticky;top:0;z-index:200;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px var(--shadow)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-icon{color:var(--primary);font-size:1.5rem}
+.logo-text{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.3rem;color:var(--primary);letter-spacing:.06em}
+.logo-sub{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);display:block;line-height:1}
+.spacer{flex:1}
+.chip{display:flex;align-items:center;gap:6px;background:var(--elevated);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:.8rem;font-family:'Share Tech Mono',monospace;color:var(--muted);white-space:nowrap}
+.chip.score{color:var(--secondary)}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 8px;color:var(--muted);cursor:pointer;display:flex;align-items:center;transition:all .2s}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ══ LAYOUT ═════════════════════════════════════════════════ */
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:200px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:16px 8px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.sidebar-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 10px;margin:12px 0 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .15s;color:var(--muted);font-size:.875rem;position:relative}
+.nav-item:hover{background:var(--elevated);color:var(--text)}
+.nav-item.active{background:var(--prime-dim);color:var(--primary)}
+.nav-item .material-symbols-outlined{font-size:1.1rem}
+.nav-badge{margin-left:auto;background:var(--elevated);border:1px solid var(--border);border-radius:20px;padding:1px 8px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted)}
+.nav-item.active .nav-badge{background:rgba(201,164,255,.15);border-color:var(--prime-dim);color:var(--primary)}
+
+.main{flex:1;padding:24px;overflow-y:auto}
+.page-header{margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.page-title{font-family:'Rajdhani',sans-serif;font-size:1.6rem;font-weight:700}
+
+/* ══ CHALLENGE GRID ══════════════════════════════════════════ */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all .2s;position:relative;display:flex;flex-direction:column;gap:10px}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);border-color:var(--prime-dim)}
+.card.solved{border-color:var(--secondary);background:color-mix(in srgb,var(--card-bg),var(--secondary) 4%)}
+.card.solved::after{content:'✓';position:absolute;top:12px;right:12px;width:22px;height:22px;background:var(--secondary);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;line-height:22px;text-align:center}
+
+.card-top{display:flex;align-items:center;justify-content:space-between}
+.card-id{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted)}
+.card-pts{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--primary)}
+.cat-chip{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;padding:2px 8px;font-weight:600;align-self:flex-start}
+.cat-WEB{background:rgba(0,255,200,.12);color:#00FFC8}
+.cat-STEGO{background:rgba(201,164,255,.15);color:#C9A4FF}
+.cat-CRYPTO{background:rgba(255,179,0,.12);color:#FFB300}
+.cat-REVERSING{background:rgba(255,107,107,.12);color:#FF6B6B}
+.cat-NETWORK{background:rgba(255,110,199,.12);color:#FF6EC7}
+.card-title{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;line-height:1.3}
+.card-desc{font-size:.8rem;color:var(--muted);line-height:1.5;flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.stars{display:flex;gap:3px}
+.star{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.star.on{background:var(--primary);box-shadow:0 0 4px var(--primary)}
+
+/* ══ STATES ═════════════════════════════════════════════════ */
+.state-box{text-align:center;padding:60px 20px;color:var(--muted)}
+.state-box .material-symbols-outlined{font-size:3rem;display:block;margin-bottom:12px;opacity:.5}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ MODAL BACKDROP ══════════════════════════════════════════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:28px;display:flex;flex-direction:column;gap:16px;transform:translateY(20px);transition:transform .2s}
+.overlay.open .modal{transform:translateY(0)}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:6px;transition:color .15s}
+.modal-close:hover{color:var(--text)}
+.modal-title-group{display:flex;flex-direction:column;gap:6px;flex:1}
+.modal-id{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted)}
+.modal-title{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;line-height:1.2}
+.modal-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.modal-pts{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700}
+.divider{height:1px;background:var(--border)}
+.modal-desc{font-size:.9rem;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.tools-row{display:flex;gap:6px;flex-wrap:wrap}
+.tool-chip{background:var(--elevated);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted)}
+
+/* Asset download */
+.asset-btn{display:inline-flex;align-items:center;gap:8px;background:var(--elevated);border:1px solid var(--border);border-radius:10px;padding:10px 16px;color:var(--secondary);font-size:.85rem;text-decoration:none;transition:all .2s;width:fit-content}
+.asset-btn:hover{border-color:var(--secondary);background:rgba(0,255,200,.08)}
+.asset-btn .material-symbols-outlined{font-size:1rem}
+
+/* Flag input */
+.flag-row{display:flex;gap:8px}
+.flag-input{flex:1;background:var(--elevated);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.9rem;outline:none;transition:border-color .2s}
+.flag-input:focus{border-color:var(--primary)}
+.flag-input.ok{border-color:var(--secondary);background:rgba(0,255,200,.06)}
+.flag-input.err{border-color:var(--error);animation:shake .3s}
+.flag-input:disabled{opacity:.5;cursor:not-allowed}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.submit-btn{background:var(--prime-dim);border:none;border-radius:10px;padding:12px 20px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:filter .2s}
+.submit-btn:hover:not(:disabled){filter:brightness(1.2)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.feedback{font-size:.85rem;border-radius:8px;padding:8px 12px;display:none;align-items:center;gap:6px}
+.feedback.show{display:flex}
+.feedback.ok{background:rgba(0,255,200,.1);color:var(--secondary)}
+.feedback.err{background:rgba(255,107,107,.1);color:var(--error)}
+.feedback.info{background:rgba(201,164,255,.1);color:var(--primary)}
+.attempts-info{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hint-box{background:rgba(255,179,0,.08);border:1px solid rgba(255,179,0,.3);border-radius:10px;padding:12px 16px;font-size:.85rem;color:var(--warning);display:none;gap:8px;align-items:flex-start}
+.hint-box.show{display:flex}
+
+/* Cooldown */
+.cooldown-box{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);border-radius:10px;padding:10px 14px;font-size:.8rem;color:var(--error);display:none;gap:8px;align-items:center}
+.cooldown-box.show{display:flex}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;flex:1}
+.progress-fill{height:100%;background:var(--error);border-radius:2px;transition:width 1s linear}
+
+/* Solved badge in modal */
+.solved-banner{background:rgba(0,255,200,.1);border:1px solid var(--secondary);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:8px;color:var(--secondary);font-weight:600}
+
+/* ══ NICKNAME MODAL ══════════════════════════════════════════ */
+.nick-modal{max-width:420px}
+.nick-modal p{font-size:.9rem;color:var(--muted);line-height:1.6}
+.text-input{width:100%;background:var(--elevated);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-size:.95rem;outline:none;transition:border-color .2s}
+.text-input:focus{border-color:var(--primary)}
+.nick-hint{font-size:.75rem;color:var(--muted);margin-top:4px}
+.primary-btn{background:linear-gradient(135deg,var(--prime-dim),#7B00D4);border:none;border-radius:10px;padding:13px 24px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;width:100%;transition:filter .2s;letter-spacing:.06em}
+.primary-btn:hover{filter:brightness(1.15)}
+.skip-btn{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;text-decoration:underline;width:100%;padding:6px;transition:color .2s}
+.skip-btn:hover{color:var(--text)}
+
+/* ══ TOAST ══════════════════════════════════════════════════ */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.875rem;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px var(--shadow);pointer-events:all;animation:slide-in .3s ease;max-width:320px}
+.toast.ok{border-color:var(--secondary);color:var(--secondary)}
+.toast.err{border-color:var(--error);color:var(--error)}
+.toast.info{border-color:var(--primary);color:var(--primary)}
+@keyframes slide-in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══ LEADERBOARD PANEL ═══════════════════════════════════════ */
+.lb-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:20px}
+.lb-header{padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:8px}
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid rgba(46,42,69,.4);font-size:.875rem}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;flex-shrink:0}
+.lb-rank.r1{background:#FFD700;color:#000}
+.lb-rank.r2{background:#C0C0C0;color:#000}
+.lb-rank.r3{background:#CD7F32;color:#000}
+.lb-rank.rn{background:var(--elevated);color:var(--muted);border:1px solid var(--border)}
+.lb-nick{flex:1;font-weight:600}
+.lb-score{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--primary)}
+
+/* ══ RESPONSIVE ══════════════════════════════════════════════ */
+@media(max-width:640px){
+  .sidebar{display:none}
+  .main{padding:16px}
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="logo" href="#" onclick="return false">
+    <span class="material-symbols-outlined logo-icon">terminal</span>
+    <div><span class="logo-text">Volta-OliCyber</span><span class="logo-sub">IISS Volta De Gemmis · CTF</span></div>
+  </a>
+  <div class="spacer"></div>
+  <div class="chip score" id="score-chip" style="display:none">
+    <span class="material-symbols-outlined" style="font-size:.9rem">stars</span>
+    <span id="score-val">0 pt</span>
+  </div>
+  <div class="chip" id="user-chip">
+    <span class="material-symbols-outlined" style="font-size:.9rem">account_circle</span>
+    <span id="user-val">...</span>
+  </div>
+  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Cambia tema">
+    <span class="material-symbols-outlined" id="theme-icon">light_mode</span>
+  </button>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-label">Categorie</div>
+    <div class="nav-item active" data-cat="ALL" onclick="filterCat('ALL')">
+      <span class="material-symbols-outlined">grid_view</span>Tutte
+      <span class="nav-badge" id="b-ALL">–</span>
+    </div>
+    <div class="nav-item" data-cat="WEB" onclick="filterCat('WEB')">
+      <span class="material-symbols-outlined">public</span>Web
+      <span class="nav-badge" id="b-WEB">–</span>
+    </div>
+    <div class="nav-item" data-cat="STEGO" onclick="filterCat('STEGO')">
+      <span class="material-symbols-outlined">image_search</span>Stego
+      <span class="nav-badge" id="b-STEGO">–</span>
+    </div>
+    <div class="nav-item" data-cat="CRYPTO" onclick="filterCat('CRYPTO')">
+      <span class="material-symbols-outlined">lock</span>Crypto
+      <span class="nav-badge" id="b-CRYPTO">–</span>
+    </div>
+    <div class="nav-item" data-cat="REVERSING" onclick="filterCat('REVERSING')">
+      <span class="material-symbols-outlined">bug_report</span>Reversing
+      <span class="nav-badge" id="b-REVERSING">–</span>
+    </div>
+    <div class="nav-item" data-cat="NETWORK" onclick="filterCat('NETWORK')">
+      <span class="material-symbols-outlined">wifi</span>Network
+      <span class="nav-badge" id="b-NETWORK">–</span>
+    </div>
+    <div class="sidebar-label" style="margin-top:20px">Classifica</div>
+    <div id="lb-mini"></div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page-header">
+      <h1 class="page-title" id="page-title">Tutte le Sfide</h1>
+    </div>
+
+    <div id="state-loading" class="state-box">
+      <div class="spinner"></div>
+      Caricamento sfide...
+    </div>
+    <div id="state-error" class="state-box" style="display:none">
+      <span class="material-symbols-outlined">wifi_off</span>
+      Impossibile caricare le sfide.<br>
+      <small id="err-detail" style="font-family:monospace;font-size:.75rem"></small>
+    </div>
+
+    <div id="grid" class="grid" style="display:none"></div>
+  </main>
+</div>
+
+<!-- ══ OVERLAY: nickname ══════════════════════════════════════ -->
+<div class="overlay" id="ov-nick">
+  <div class="modal nick-modal">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <span class="modal-title">Benvenuto!</span>
+      </div>
+    </div>
+    <p>Scegli un nickname da visualizzare in classifica, oppure salta per usare un nome generato automaticamente.</p>
+    <div>
+      <input class="text-input" id="nick-input" type="text" maxlength="24" placeholder="es. H4ck3r_42" autocomplete="off">
+      <div class="nick-hint">Facoltativo · Max 24 caratteri</div>
+    </div>
+    <button class="primary-btn" onclick="confirmNick()">
+      <span class="material-symbols-outlined" style="vertical-align:middle;font-size:1rem">check</span>
+      Entra nella piattaforma
+    </button>
+    <button class="skip-btn" onclick="confirmNick(true)">Salta e usa nome automatico</button>
+  </div>
+</div>
+
+<!-- ══ OVERLAY: sfida ════════════════════════════════════════ -->
+<div class="overlay" id="ov-challenge" onclick="closeChallengeIfBg(event)">
+  <div class="modal" id="challenge-modal">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <span class="modal-id" id="m-id"></span>
+        <span class="modal-title" id="m-title"></span>
+        <div class="modal-meta">
+          <span class="cat-chip" id="m-cat"></span>
+          <span class="modal-pts" id="m-pts"></span>
+          <div class="stars" id="m-stars"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeChallenge()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="modal-desc" id="m-desc"></div>
+
+    <div id="m-asset-row" style="display:none">
+      <a class="asset-btn" id="m-asset-link" href="#" download target="_blank" rel="noopener">
+        <span class="material-symbols-outlined">download</span>
+        <span id="m-asset-name">Scarica file sfida</span>
+      </a>
+    </div>
+
+    <div>
+      <div class="sidebar-label" style="margin:0 0 6px">Strumenti consigliati</div>
+      <div class="tools-row" id="m-tools"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Solved banner (shown when already solved) -->
+    <div class="solved-banner" id="m-solved-banner" style="display:none">
+      <span class="material-symbols-outlined">verified</span>
+      Sfida completata! Ottimo lavoro.
+    </div>
+
+    <!-- Flag input (hidden when solved) -->
+    <div id="m-flag-section">
+      <div class="sidebar-label" style="margin:0 0 8px">Inserisci flag</div>
+      <div class="flag-row">
+        <input class="flag-input" id="flag-input" type="text" placeholder="FLAG{...}" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="submit-btn" id="submit-btn" onclick="submitFlag()">
+          <span class="material-symbols-outlined">send</span>Verifica
+        </button>
+      </div>
+      <div class="feedback" id="flag-feedback"></div>
+      <div class="cooldown-box" id="cooldown-box">
+        <span class="material-symbols-outlined">timer</span>
+        Cooldown: <span id="cd-secs">30</span>s
+        <div class="progress-bar"><div class="progress-fill" id="cd-fill" style="width:100%"></div></div>
+      </div>
+      <div class="attempts-info">
+        <span class="material-symbols-outlined" style="font-size:.9rem">info</span>
+        <span id="attempts-label">Tentativi: 0 / 10</span>
+      </div>
+    </div>
+
+    <div class="hint-box" id="hint-box">
+      <span class="material-symbols-outlined">lightbulb</span>
+      <span id="hint-text"></span>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<script>
+'use strict';
+// ── CONFIG ────────────────────────────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwZUUMcQVUc6AA-Tc3VvATJnHjTnLG1YUCM4zqezhhW3Lp2VUUM1koff8sey00j1OWuIA/exec';
+const RATE_MAX = 10;
+const HINT_AFTER = 5;
+const COOLDOWN_AFTER = 3;
+const COOLDOWN_SECS = 30;
+
+// ── STATE ─────────────────────────────────────────────────────
+const S = {
+  uid:        '',
+  nickname:   '',
+  score:      0,
+  solved:     new Set(),
+  attempts:   {},  // {id: count}
+  lastFail:   {},  // {id: timestamp}
+  challenges: [],
+  filter:     'ALL',
+  current:    null,
+  cdTimer:    null
+};
+
+// ── THEME ─────────────────────────────────────────────────────
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.getElementById('theme-icon').textContent = t === 'dark' ? 'light_mode' : 'dark_mode';
+  localStorage.setItem('voc_theme', t);
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+}
+(function() {
+  applyTheme(localStorage.getItem('voc_theme') || 'dark');
+})();
+
+// ── FINGERPRINT ───────────────────────────────────────────────
+async function fingerprint() {
+  const c = document.createElement('canvas');
+  const g = c.getContext('2d');
+  g.fillStyle = '#7b3f00'; g.fillRect(0,0,150,30);
+  g.fillStyle = '#00fff0'; g.font = '14px Arial'; g.fillText('VoltaCTF🔑', 5, 20);
+  const raw = [
+    c.toDataURL(),
+    navigator.userAgent,
+    screen.width+'x'+screen.height,
+    navigator.language,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+    navigator.hardwareConcurrency
+  ].join('|');
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  return hex.substring(0,16).toUpperCase();
+}
+
+// ── BOOT ──────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('nick-input').addEventListener('keydown', e => { if(e.key==='Enter') confirmNick(); });
+  document.getElementById('flag-input').addEventListener('keydown', e => { if(e.key==='Enter') submitFlag(); });
+
+  // Restore theme
+  applyTheme(localStorage.getItem('voc_theme') || 'dark');
+
+  // Generate UID
+  S.uid = localStorage.getItem('voc_uid') || await fingerprint();
+  localStorage.setItem('voc_uid', S.uid);
+
+  // Restore persisted state
+  S.score   = parseInt(localStorage.getItem('voc_score') || '0');
+  S.solved  = new Set(JSON.parse(localStorage.getItem('voc_solved') || '[]'));
+  S.attempts = JSON.parse(localStorage.getItem('voc_attempts') || '{}');
+
+  const savedNick = localStorage.getItem('voc_nickname');
+  if (savedNick) {
+    S.nickname = savedNick;
+    await registerAndLoad(false);
+  } else {
+    openOverlay('ov-nick');
+    setTimeout(() => document.getElementById('nick-input').focus(), 200);
+  }
+});
+
+async function confirmNick(skip) {
+  const val = skip ? '' : document.getElementById('nick-input').value.trim();
+  S.nickname = val;
+  closeOverlay('ov-nick');
+  await registerAndLoad(true);
+}
+
+async function registerAndLoad(save) {
+  const res = await gasPost({ action: 'registerUser', uid: S.uid, nickname: S.nickname }).catch(() => null);
+  if (res && res.nickname) {
+    S.nickname = res.nickname;
+    if (res.existing) {
+      S.score  = res.score;
+      // Sync solved from server if needed (client persists locally; server is authoritative for score)
+    }
+  } else if (!S.nickname) {
+    S.nickname = 'user_' + S.uid.substring(0,8);
+  }
+  if (save) localStorage.setItem('voc_nickname', S.nickname);
+  updateTopbar();
+  await loadChallenges();
+  setInterval(refreshLeaderboard, 30000);
+}
+
+function updateTopbar() {
+  document.getElementById('user-val').textContent = S.nickname;
+  document.getElementById('score-val').textContent = S.score + ' pt';
+  document.getElementById('score-chip').style.display = 'flex';
+}
+
+// ── API ───────────────────────────────────────────────────────
+async function gasGet(params) {
+  const url = new URL(GAS_URL);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+  const r = await fetch(url.toString());
+  return r.json();
+}
+
+async function gasPost(data) {
+  const r = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  return r.json();
+}
+
+// ── LOAD ──────────────────────────────────────────────────────
+async function loadChallenges() {
+  document.getElementById('state-loading').style.display = 'block';
+  document.getElementById('state-error').style.display   = 'none';
+  document.getElementById('grid').style.display          = 'none';
+
+  // Avvia leaderboard in parallelo senza bloccare
+  refreshLeaderboard();
+
+  try {
+    const data = await gasGet({ action: 'getCatalog' });
+    if (data.error) throw new Error(data.error);
+    S.challenges = data.challenges || [];
+  } catch(e) {
+    // Fallback offline
+    try {
+      const r = await fetch('challenges.json');
+      const d = await r.json();
+      S.challenges = Array.isArray(d) ? d : (d.challenges || []);
+      toast('Modalità offline — le flag non vengono validate sul server.', 'info');
+    } catch(_) {
+      document.getElementById('state-loading').style.display = 'none';
+      document.getElementById('state-error').style.display   = 'block';
+      document.getElementById('err-detail').textContent      = e.message;
+      return;
+    }
+  }
+
+  renderGrid();
+}
+
+async function refreshLeaderboard() {
+  try {
+    const data = await gasGet({ action: 'getLeaderboard' });
+    if (!data.leaderboard) return;
+    const mini = document.getElementById('lb-mini');
+    mini.innerHTML = data.leaderboard.slice(0,5).map((u,i) => `
+      <div class="lb-row" style="padding:6px 10px;font-size:.78rem">
+        <div class="lb-rank ${['r1','r2','r3'][i]||'rn'}">${i+1}</div>
+        <div class="lb-nick" style="font-size:.78rem">${esc(u.nickname)}</div>
+        <div class="lb-score">${u.score}</div>
+      </div>`).join('');
+  } catch(_) {}
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+const CAT_ICONS = {WEB:'public',STEGO:'image_search',CRYPTO:'lock',REVERSING:'bug_report',NETWORK:'wifi'};
+
+function renderGrid() {
+  const g = document.getElementById('grid');
+  const list = S.filter === 'ALL' ? S.challenges : S.challenges.filter(c=>c.categoria===S.filter);
+  g.innerHTML = list.map(c => {
+    const solved = S.solved.has(c.id);
+    const stars  = [1,2,3,4,5].map(i=>`<div class="star${i<=c.difficolta?' on':''}"></div>`).join('');
+    return `<div class="card${solved?' solved':''}" onclick="openChallenge('${esc(c.id)}')">
+      <div class="card-top">
+        <span class="card-id">${esc(c.id)}</span>
+        <span class="card-pts">${c.punti} pt</span>
+      </div>
+      <span class="cat-chip cat-${esc(c.categoria)}">${esc(c.categoria)}</span>
+      <div class="card-title">${esc(c.titolo)}</div>
+      <div class="card-desc">${esc(c.descrizione.substring(0,120))}...</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span style="font-size:.72rem;color:var(--muted)">${esc((c.tool||'').split(',')[0].trim())}</span>
+        <div class="stars">${stars}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('state-loading').style.display = 'none';
+  g.style.display = 'grid';
+  updateBadges();
+}
+
+function updateBadges() {
+  const cats = ['ALL','WEB','STEGO','CRYPTO','REVERSING','NETWORK'];
+  cats.forEach(cat => {
+    const list = cat === 'ALL' ? S.challenges : S.challenges.filter(c=>c.categoria===cat);
+    const solved = list.filter(c=>S.solved.has(c.id)).length;
+    const el = document.getElementById('b-'+cat);
+    if (el) el.textContent = solved + '/' + list.length;
+  });
+}
+
+function filterCat(cat) {
+  S.filter = cat;
+  document.querySelectorAll('.nav-item[data-cat]').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  const names = {ALL:'Tutte le Sfide',WEB:'Web Exploitation',STEGO:'Steganografia',CRYPTO:'Crittografia',REVERSING:'Reverse Engineering',NETWORK:'Network Analysis'};
+  document.getElementById('page-title').textContent = names[cat] || cat;
+  renderGrid();
+}
+
+// ── CHALLENGE MODAL ───────────────────────────────────────────
+function openChallenge(id) {
+  const c = S.challenges.find(x=>x.id===id);
+  if (!c) return;
+  S.current = c;
+
+  document.getElementById('m-id').textContent    = c.id;
+  document.getElementById('m-title').textContent = c.titolo;
+
+  const catEl = document.getElementById('m-cat');
+  catEl.className = 'cat-chip cat-' + c.categoria;
+  catEl.textContent = c.categoria;
+
+  const colors = {WEB:'#00FFC8',STEGO:'#C9A4FF',CRYPTO:'#FFB300',REVERSING:'#FF6B6B',NETWORK:'#FF6EC7'};
+  const ptsEl = document.getElementById('m-pts');
+  ptsEl.textContent = c.punti + ' pt';
+  ptsEl.style.color = colors[c.categoria] || 'var(--primary)';
+
+  document.getElementById('m-stars').innerHTML = [1,2,3,4,5].map(i =>
+    `<div class="star${i<=c.difficolta?' on':''}" style="${i<=c.difficolta?'background:'+colors[c.categoria]+';box-shadow:0 0 4px '+colors[c.categoria]:''}"></div>`
+  ).join('');
+
+  // Descrizione: preserva newline
+  document.getElementById('m-desc').textContent = c.descrizione;
+
+  // Asset download
+  const assetRow  = document.getElementById('m-asset-row');
+  const assetLink = document.getElementById('m-asset-link');
+  const assetName = document.getElementById('m-asset-name');
+  if (c.assetUrl && c.assetUrl.trim()) {
+    const fname = c.assetUrl.split('/').pop() || 'file_' + c.id;
+    assetLink.href = c.assetUrl;
+    assetName.textContent = 'Scarica ' + fname;
+    assetRow.style.display = 'block';
+  } else {
+    assetRow.style.display = 'none';
+  }
+
+  // Tools
+  document.getElementById('m-tools').innerHTML = (c.tool||'').split(',').map(t =>
+    `<span class="tool-chip">${esc(t.trim())}</span>`).join('');
+
+  const solved = S.solved.has(c.id);
+  document.getElementById('m-solved-banner').style.display = solved ? 'flex' : 'none';
+  document.getElementById('m-flag-section').style.display  = solved ? 'none' : 'block';
+
+  if (!solved) {
+    const inp = document.getElementById('flag-input');
+    inp.value = '';
+    inp.className = 'flag-input';
+    inp.disabled = false;
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined">send</span>Verifica';
+
+    setFeedback('');
+    updateAttUI();
+    checkCooldown();
+  }
+
+  openOverlay('ov-challenge');
+  setTimeout(() => { if (!solved) document.getElementById('flag-input').focus(); }, 250);
+}
+
+function closeChallengeIfBg(e) {
+  if (e.target === document.getElementById('ov-challenge')) closeChallenge();
+}
+function closeChallenge() { closeOverlay('ov-challenge'); }
+
+function updateAttUI() {
+  const c = S.current;
+  const n = S.attempts[c.id] || 0;
+  document.getElementById('attempts-label').textContent = 'Tentativi: ' + n + ' / ' + RATE_MAX;
+
+  const hint = document.getElementById('hint-box');
+  if (n >= HINT_AFTER) {
+    const m = (c.descrizione||'').match(/[Hh]int[:\s]+(.+)/);
+    document.getElementById('hint-text').textContent = m ? m[1] : 'Consulta la documentazione degli strumenti suggeriti.';
+    hint.classList.add('show');
+  } else {
+    hint.classList.remove('show');
+  }
+}
+
+function checkCooldown() {
+  const c = S.current;
+  const n = S.attempts[c.id] || 0;
+  const last = S.lastFail[c.id] || 0;
+  const elapsed = (Date.now() - last) / 1000;
+  if (n > 0 && n % COOLDOWN_AFTER === 0 && elapsed < COOLDOWN_SECS) {
+    startCooldown(Math.ceil(COOLDOWN_SECS - elapsed));
+  }
+}
+
+function startCooldown(secs) {
+  const box  = document.getElementById('cooldown-box');
+  const fill = document.getElementById('cd-fill');
+  const secsEl = document.getElementById('cd-secs');
+  const btn  = document.getElementById('submit-btn');
+  box.classList.add('show');
+  btn.disabled = true;
+  fill.style.width = '100%';
+  let rem = secs;
+  secsEl.textContent = rem;
+  if (S.cdTimer) clearInterval(S.cdTimer);
+  S.cdTimer = setInterval(() => {
+    rem--;
+    secsEl.textContent = rem;
+    fill.style.width = (rem / COOLDOWN_SECS * 100) + '%';
+    if (rem <= 0) {
+      clearInterval(S.cdTimer);
+      box.classList.remove('show');
+      btn.disabled = false;
+    }
+  }, 1000);
+}
+
+// ── FLAG SUBMIT ───────────────────────────────────────────────
+async function submitFlag() {
+  const c = S.current;
+  if (!c || S.solved.has(c.id)) return;
+
+  const inp = document.getElementById('flag-input');
+  const val = inp.value.trim();
+  if (!val) { setFeedback('Inserisci una flag!', 'info'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .5s linear infinite">refresh</span>...';
+
+  try {
+    const res = await gasPost({
+      action: 'submitFlag',
+      uid: S.uid,
+      nickname: S.nickname,
+      challengeId: c.id,
+      attempt: val
+    });
+
+    if (res.code === 'RATE_LIMIT') {
+      setFeedback(res.message, 'err');
+      btn.disabled = true;
+      return;
+    }
+
+    S.attempts[c.id] = (S.attempts[c.id] || 0) + 1;
+    localStorage.setItem('voc_attempts', JSON.stringify(S.attempts));
+
+    if (res.correct) {
+      inp.className = 'flag-input ok';
+      S.solved.add(c.id);
+      S.score += res.points || 0;
+      localStorage.setItem('voc_solved', JSON.stringify([...S.solved]));
+      localStorage.setItem('voc_score', String(S.score));
+      updateTopbar();
+      updateBadges();
+      renderGrid();
+      setFeedback('🎉 Corretto! +' + (res.points||0) + ' pt', 'ok');
+      toast('✅ ' + c.titolo + ' — +' + (res.points||0) + ' pt', 'ok');
+      document.getElementById('m-flag-section').style.display  = 'none';
+      document.getElementById('m-solved-banner').style.display = 'flex';
+    } else {
+      inp.className = 'flag-input err';
+      setTimeout(() => { inp.className = 'flag-input'; }, 400);
+      S.lastFail[c.id] = Date.now();
+      updateAttUI();
+      const rem = typeof res.remaining === 'number' ? res.remaining : '?';
+      setFeedback('❌ Flag errata. Rimanenti: ' + rem, 'err');
+      // Cooldown ogni N fallimenti
+      const n = S.attempts[c.id] || 0;
+      if (n > 0 && n % COOLDOWN_AFTER === 0) startCooldown(COOLDOWN_SECS);
+      else { btn.disabled = false; }
+    }
+  } catch(_) {
+    setFeedback('Errore di rete. Riprova.', 'err');
+    btn.disabled = false;
+  }
+
+  btn.innerHTML = '<span class="material-symbols-outlined">send</span>Verifica';
+}
+
+function setFeedback(msg, type) {
+  const el = document.getElementById('flag-feedback');
+  if (!msg) { el.className = 'feedback'; el.textContent = ''; return; }
+  el.className = 'feedback show ' + (type||'info');
+  el.innerHTML = msg;
+}
+
+// ── OVERLAYS ──────────────────────────────────────────────────
+function openOverlay(id)  { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg, type) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'info');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(40px)'; t.style.transition='all .3s'; setTimeout(()=>t.remove(),300); }, 3500);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
