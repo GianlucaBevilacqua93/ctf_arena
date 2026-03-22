@@ -481,16 +481,14 @@ function updateTopbar() {
 async function gasGet(params) {
   const url = new URL(GAS_URL);
   Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
-  const r = await fetch(url.toString());
+  const r = await fetch(url.toString(), { redirect: 'follow' });
   return r.json();
 }
 
 async function gasPost(data) {
-  const r = await fetch(GAS_URL, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
+  const url = new URL(GAS_URL);
+  url.searchParams.set('p', JSON.stringify(data));
+  const r = await fetch(url.toString(), { redirect: 'follow' });
   return r.json();
 }
 
